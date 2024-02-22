@@ -1,7 +1,51 @@
 const router = require('express').Router();
+const { JWT_SECRET } = require('../secret')
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 
 router.post('/register', (req, res) => {
-  res.end('implement register, please!');
+  
+    const { username, password } = req.body;
+
+    // Check if username and password are provided
+    if (!username || !password) {
+      return res.status(400).json("username and password required");
+    }
+
+    // Check if the username already exists
+    // Replace the following code with your logic to check if the username exists in the database
+    const userExists = false; // Replace with your logic
+
+    if (userExists) {
+      return res.status(400).json("username taken");
+    }
+
+    // Hash the password
+    const hashedPassword = bcrypt.hashSync(password, 8);
+
+    // Save the new user to the database
+    // Replace the following code with your logic to save the new user to the database
+    const newUser = {
+      username,
+      password: hashedPassword
+    };
+
+    // Generate a JWT token
+    const token = jwt.sign({ username }, JWT_SECRET);
+
+    // Return the response with the new user's information and token
+    res.status(200).json({
+      id: newUser.id,
+      username: newUser.username,
+      password: newUser.password,
+      token
+    });
+  });
+
+  module.exports = router;
+  
+
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -27,10 +71,41 @@ router.post('/register', (req, res) => {
     4- On FAILED registration due to the `username` being taken,
       the response body should include a string exactly as follows: "username taken".
   */
-});
+
 
 router.post('/login', (req, res) => {
-  res.end('implement login, please!');
+  const { username, password } = req.body;
+
+  // Check if username and password are provided
+  if (!username || !password) {
+    return res.status(400).json("username and password required");
+  }
+
+  // Check if the username exists in the database
+  // Replace the following code with your logic to check if the username exists in the database
+  const userExists = true; // Replace with your logic
+
+  if (!userExists) {
+    return res.status(400).json("invalid credentials");
+  }
+
+  // Check if the password is correct
+  // Replace the following code with your logic to check if the password is correct
+  const passwordCorrect = true; // Replace with your logic
+
+  if (!passwordCorrect) {
+    return res.status(400).json("invalid credentials");
+  }
+
+  // Generate a JWT token
+  const token = jwt.sign({ username }, JWT_SECRET);
+
+  // Return the response with the new user's information and token
+  res.status(200).json({
+    message: `welcome, ${username}`,
+    token
+  });
+  
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
