@@ -97,8 +97,7 @@ router.post('/login', (req, res) => {
   }
 
   // Check if the username exists in the database
-  // Replace the following code with your logic to check if the username exists in the database
-  const userExists = true; // Replace with your logic
+  const userExists = checkIfUsernameExists(username);
 
   if (!userExists) {
     return res.status(400).json("invalid credentials");
@@ -120,6 +119,7 @@ router.post('/login', (req, res) => {
     message: `welcome, ${username}`,
     token
   });
+});
   
   /*
     IMPLEMENT
@@ -144,6 +144,5 @@ router.post('/login', (req, res) => {
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
-});
 
 module.exports = router;
