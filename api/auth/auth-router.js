@@ -5,43 +5,58 @@ const jwt = require('jsonwebtoken');
 
 
 router.post('/register', (req, res) => {
-  
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    // Check if username and password are provided
-    if (!username || !password) {
-      return res.status(400).json("username and password required");
-    }
+  // Check if username and password are provided
+  if (!username || !password) {
+    return res.status(400).json("username and password required");
+  }
 
-    // Check if the username already exists
-    // Replace the following code with your logic to check if the username exists in the database
-    const userExists = false; // Replace with your logic
+  // Check if the username already exists
+  // Replace the following code with your logic to check if the username exists in the database
+  const userExists = checkIfUsernameExists(username); // Replace with your logic
 
-    if (userExists) {
-      return res.status(400).json("username taken");
-    }
+  if (userExists) {
+    return res.status(400).json("username taken");
+  }
 
-    // Hash the password
-    const hashedPassword = bcrypt.hashSync(password, 8);
+  // Hash the password
+  const hashedPassword = bcrypt.hashSync(password, 8);
 
-    // Save the new user to the database
-    // Replace the following code with your logic to save the new user to the database
-    const newUser = {
-      username,
-      password: hashedPassword
-    };
+  // Save the new user to the database
+  // Replace the following code with your logic to save the new user to the database
+  const newUser = {
+    id: 1, // Add an id property
+    username,
+    password: hashedPassword
+  };
 
-    // Generate a JWT token
-    const token = jwt.sign({ username }, JWT_SECRET);
+  // Generate a JWT token
+  const token = jwt.sign({ username }, JWT_SECRET);
 
-    // Return the response with the new user's information and token
-    res.status(200).json({
-      id: newUser.id,
-      username: newUser.username,
-      password: newUser.password,
-      token
-    });
+  // Return the response with the new user's information and token
+  res.status(200).json({
+    id: newUser.id,
+    username: newUser.username,
+    password: newUser.password,
+    token
   });
+});
+
+function checkIfUsernameExists(username) {
+  // Implement your logic to check if the username exists in the users table
+  // Return true if the username exists, false otherwise
+
+  // Assuming you have a 'users' table in your database
+  const users = [
+    { id: 1, username: 'user1' },
+    { id: 2, username: 'user2' },
+    { id: 3, username: 'user3' }
+  ];
+
+  const existingUser = users.find(user => user.username === username);
+  return !!existingUser;
+}
 
   module.exports = router;
   
