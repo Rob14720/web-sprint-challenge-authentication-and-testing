@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const restricted = require('../middleware/restricted');
 
 
 router.post('/register', (req, res) => {
@@ -17,7 +18,7 @@ router.post('/register', (req, res) => {
   const userExists = checkIfUsernameExists(username); // Replace with your logic
 
   if (userExists) {
-    return res.status(400).json("username taken");
+    return res.status(409).json("username taken");
   }
 
   // Hash the password
@@ -26,20 +27,16 @@ router.post('/register', (req, res) => {
   // Save the new user to the database
   // Replace the following code with your logic to save the new user to the database
   const newUser = {
-    id: 1, // Add an id property
+    id: generateUniqueId(), // Replace with your logic to generate a unique ID
     username,
-    password: hashedPassword
+    password: hashedPassword // Include the hashed password in the new user object
   };
 
-  // Generate a JWT token
-  const token = jwt.sign({ username }, JWT_SECRET);
-
-  // Return the response with the new user's information and token
-  res.status(200).json({
+  // Return the response with the new user's information
+  res.status(201).json({
     id: newUser.id,
     username: newUser.username,
-    password: newUser.password,
-    token
+    password: newUser.password
   });
 });
 
@@ -58,7 +55,11 @@ function checkIfUsernameExists(username) {
   return !!existingUser;
 }
 
-  module.exports = router;
+function generateUniqueId() {
+  const timestamp = Date.now();
+  const randomNum = Math.floor(Math.random() * 1000);
+  return `${timestamp}-${randomNum}`;
+}
   
 
   /*
@@ -90,35 +91,31 @@ function checkIfUsernameExists(username) {
 
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
-
+  const userExists = checkIfUsernameExists(username);
+  const passwordCorrect = true;
+  const token = jwt.sign({ username }, JWT_SECRET);
   // Check if username and password are provided
   if (!username || !password) {
     return res.status(400).json("username and password required");
-  }
-
-  // Check if the username exists in the database
-  const userExists = checkIfUsernameExists(username);
-
-  if (!userExists) {
+  } else if (!userExists) {
+    return res.status(200).json("invalid credentials");
+  } else if (!passwordCorrect) {
     return res.status(400).json("invalid credentials");
+  } else {
+    res.status(200).json({
+      message: `welcome, ${username}`,
+      token
+    });
   }
 
   // Check if the password is correct
   // Replace the following code with your logic to check if the password is correct
-  const passwordCorrect = true; // Replace with your logic
-
-  if (!passwordCorrect) {
-    return res.status(400).json("invalid credentials");
-  }
+   // Replace with your logic
 
   // Generate a JWT token
-  const token = jwt.sign({ username }, JWT_SECRET);
+
 
   // Return the response with the new user's information and token
-  res.status(200).json({
-    message: `welcome, ${username}`,
-    token
-  });
 });
   
   /*
