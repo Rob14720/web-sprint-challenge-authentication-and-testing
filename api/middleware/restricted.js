@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../secret/index');
+const { findBy } = require('../users/user-model');
 
 const restricted = (req, res, next) => {
   /*
@@ -36,6 +37,10 @@ const restricted = (req, res, next) => {
 
 
 
-module.exports = 
-  restricted;
+
+
+
+module.exports = {
+  restricted
+}
   
