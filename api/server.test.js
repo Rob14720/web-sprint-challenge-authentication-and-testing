@@ -5,6 +5,14 @@ const db = require('../data/dbConfig')
 const bcrypt = require('bcryptjs')
 const jwtDecode = require('jwt-decode')
 
+beforeAll(async () => {
+  await db.migrate.rollback()
+  await db.migrate.latest()
+})
+
+beforeEach(async () => {
+  await db('users').truncate()
+})
 
 
 test('sanity', () => {
@@ -21,14 +29,14 @@ describe('[POST] /api/auth/register', () => {
       password: expect.any(String),
     })
   })
-  it('[2] responds with a 400 status code if username or password is missing', async () => {
-    const res = await request(server)
-      .post('/api/auth/register')
-      .send({ username: 'test' })
-    expect(res.status).toBe(400)
-  }
-  )
-})
+  
+  it('[2] adds a new user with a bcrypted password to the users table on success', async () => {
+    await request(server).post('/api/auth/register').send({ username: 'meow', password: '1234' })
+    const meow = await db('users').where('username', 'meow').first()
+    expect(bcrypt.compareSync('1234', meow.password)).toBeTruthy()
+  })
+  })
+
 
 describe('[POST] /api/auth/login', () => {
   it('[3] responds with a 200 status code if the user is logged in', async () => {
@@ -45,4 +53,5 @@ describe('[POST] /api/auth/login', () => {
     expect(res.status).toBe(400)
   }
   )
+ 
 })

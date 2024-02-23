@@ -2,43 +2,25 @@ const router = require('express').Router();
 const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const restricted = require('../middleware/restricted');
+const Users = require('../users/user-model');
+const restricted = require ('../middleware/restricted');
 
+router.post('/register', (req, res, next) => {
+  const { username, password } = req. body;
 
-router.post('/register', (req, res) => {
-  const { username, password } = req.body;
+  const hash = bcrypt.hashSync(password, 8);
 
-  // Check if username and password are provided
-  if (!username || !password) {
-    return res.status(400).json("username and password required");
-  }
-
-  // Check if the username already exists
-  // Replace the following code with your logic to check if the username exists in the database
-  const userExists = checkIfUsernameExists(username); // Replace with your logic
-
-  if (userExists) {
-    return res.status(409).json("username taken");
-  }
-
-  // Hash the password
-  const hashedPassword = bcrypt.hashSync(password, 8);
-
-  // Save the new user to the database
-  // Replace the following code with your logic to save the new user to the database
-  const newUser = {
-    id: generateUniqueId(), // Replace with your logic to generate a unique ID
-    username,
-    password: hashedPassword // Include the hashed password in the new user object
-  };
-
-  // Return the response with the new user's information
-  res.status(201).json({
-    id: newUser.id,
-    username: newUser.username,
-    password: newUser.password
-  });
+  Users.add({ username, password: hash })
+  .then(newUser => {
+    res.status(201).json({
+      id: newUser.id,
+      username: newUser.username,
+      password: newUser.password
+    })
+  })
+  .catch(next);
 });
+
 
 function checkIfUsernameExists(username) {
   // Implement your logic to check if the username exists in the users table
