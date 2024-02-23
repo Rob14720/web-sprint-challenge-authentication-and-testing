@@ -10,39 +10,29 @@ router.post('/register', (req, res, next) => {
 
   const hash = bcrypt.hashSync(password, 8);
 
-  Users.add({ username, password: hash })
+  if(!username || !password) {
+    return res.status(400).json('username and password required')
+  } else if (checkIfUsernameExists*username) {
+    return res.status(400).json('username taken')
+  } else {
+    Users.add({ username, password: hash })
   .then(newUser => {
     res.status(201).json({
       id: newUser.id,
       username: newUser.username,
       password: newUser.password
     })
-  })
-  .catch(next);
+  }) .catch(next)
+  }
 });
 
 
-function checkIfUsernameExists(username) {
-  // Implement your logic to check if the username exists in the users table
-  // Return true if the username exists, false otherwise
-
-  // Assuming you have a 'users' table in your database
-  const users = [
-    { id: 1, username: 'user1' },
-    { id: 2, username: 'user2' },
-    { id: 3, username: 'user3' }
-  ];
-
-  const existingUser = users.find(user => user.username === username);
-  return !!existingUser;
+async function checkIfUsernameExists(username) {
+if(username) {
+  const exists = await Users.findBy({ username});
+  return exists;
 }
-
-function generateUniqueId() {
-  const timestamp = Date.now();
-  const randomNum = Math.floor(Math.random() * 1000);
-  return `${timestamp}-${randomNum}`;
 }
-  
 
   /*
     IMPLEMENT
@@ -69,9 +59,9 @@ function generateUniqueId() {
     4- On FAILED registration due to the `username` being taken,
       the response body should include a string exactly as follows: "username taken".
   */
+    
 
-
-router.post('/login', (req, res) => {
+router.post('/login', restricted, (req, res) => {
   const { username, password } = req.body;
   const userExists = checkIfUsernameExists(username);
   const passwordCorrect = true;
