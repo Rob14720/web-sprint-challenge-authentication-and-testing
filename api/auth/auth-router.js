@@ -6,31 +6,23 @@ const Users = require('../users/user-model');
 
 
 
-router.post('/register', async (req, res, next) => {
- 
-  try{
-    const { username, password } = req.body;
-   
-    if(!username || password) {
-      return res.status(400).json('username and password required')
-    }
-    const existingUser = await Users.findBy( username ).first()
+router.post('/register', (req, res, next) => {
+  const { username, password } = req. body;
 
-      if(existingUser) {
-        return res.status(400).json('username taken');
-      }
-      const hash = bcrypt.hashSync(password, 8);
-      const newUser = await Users.add({username, password: hash });
-
-      res.statius(201).json({
-        id: newUser.id,
-        username: newUser.username,
-        password: newUser.password
-      });
-    } catch(err) {
-      next(err);
-    }
-  });
+  const hash = bcrypt.hashSync(password, 8);
+  if (!username || !password) {
+    res.status(400).json("username and password required");
+  } else {
+    Users.add({ username, password: hash })
+  .then(newUser => {
+    res.status(201).json({
+      id: newUser.id,
+      username: newUser.username,
+      password: newUser.password
+    })
+  }) .catch(next)
+  }
+});
 
 
 
