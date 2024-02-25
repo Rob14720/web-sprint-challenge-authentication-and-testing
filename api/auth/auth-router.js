@@ -3,18 +3,17 @@ const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('../users/user-model');
+const { restricted, validateUserName } = require('../middleware/restricted');
 
 
 
 
-router.post('/register', (req, res, next) => {
+
+router.post('/register', validateUserName, (req, res, next) => {
   const { username, password } = req. body;
-
+  
   const hash = bcrypt.hashSync(password, 8);
 
-  if(!username || !password) {
-    return res.status(400).json({ message: "username and password required" })
-  } 
     Users.add({ username, password: hash })
   .then(newUser => {
     res.status(201).json({
@@ -22,6 +21,12 @@ router.post('/register', (req, res, next) => {
       username: newUser.username,
       password: newUser.password
     })
+      console.log(res.body.message)
+    if(!username || !password) {
+      res.status(400).json({ message: 'username and password required' })
+    } else if (username === newUser.username) {
+      res.status(400).json({ status: 400, message: 'username taken' })
+    }
   }) .catch(next)
 });
 
@@ -54,9 +59,9 @@ router.post('/register', (req, res, next) => {
   */
     
 
-router.post('/login', (req, res) => {
+router.post('/login', restricted, (req, res) => {
   const { username, password } = req.body;
-  const userExists = checkIfUsernameExists(username);
+  const userExists = true;
   const passwordCorrect = true;
   const token = jwt.sign({ username }, JWT_SECRET);
   // Check if username and password are provided
@@ -82,6 +87,8 @@ router.post('/login', (req, res) => {
 
   // Return the response with the new user's information and token
 });
+
+
   
   /*
     IMPLEMENT

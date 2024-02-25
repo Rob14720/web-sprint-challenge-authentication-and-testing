@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../secret/index');
 const { findBy } = require('../users/user-model');
 
+
 const restricted = (req, res, next) => {
   /*
     IMPLEMENT
@@ -35,12 +36,26 @@ const restricted = (req, res, next) => {
   */
 };
 
+const validateUserName = async (req, res, next) => {
+  try {
+    const [user] = await findBy({ username: req.body.username });
+    if(user) {
+      next({ status: 422, message: 'username taken'})
+    } else {
+      next();
+    }
+  } catch (err) {
+    next(err);
+  }
+}
+
 
 
 
 
 
 module.exports = {
-  restricted
+  restricted,
+  validateUserName
 }
   

@@ -24,18 +24,39 @@ describe('[POST] /api/auth/register', () => {
     const res = await request(server)
       .post('/api/auth/register')
       .send({ username: 'test', password: 'test' })
+    
+      expect(res.body).toMatchObject({
+        username: 'test',
+        password: expect.any(String),
+        id: expect.any(Number)
+      })
+  })
+
+
+  it('[2] adds a new user with a bcrypted password to the users table on success', async () => {
+    const res = await request(server)
+    .post('/api/auth/register')
+    .send({ username: 'meow', password: '1234' })
+    expect(bcrypt.compareSync('1234', res.body.password)).toBeTruthy();
     expect(res.body).toMatchObject({
-      username: 'test',
-      password: expect.any(String),
+      username: 'meow',
+      id: expect.any(Number),
     })
   })
-  
-  it('[2] adds a new user with a bcrypted password to the users table on success', async () => {
-    await request(server).post('/api/auth/register').send({ username: 'meow', password: '1234' })
-    const meow = await db('users').where('username', 'meow').first()
-    expect(bcrypt.compareSync('1234', meow.password)).toBeTruthy()
+
+
+  it('[3] responds with a message if username or password is missing', async () => {
+    const res = await request(server)
+      .post('/api/auth/register')
+      .send({ username: 'test' })
+    expect(res.body.message).toMatch(/username and password required/i)
   })
+  it('[4] responds with a message if the username is taken', async () => {
+    await request(server).post('/api/auth/register').send({ username: 'test', password: 'test' })
+    const res = await request(server).post('/api/auth/register').send({ username: 'test', password: 'test' })
+    expect(res.body.message).toMatch(/username taken/i)
   })
+})
 
 
 describe('[POST] /api/auth/login', () => {
@@ -53,5 +74,16 @@ describe('[POST] /api/auth/login', () => {
     expect(res.status).toBe(400)
   }
   )
- 
+
+  it('[5] log in the user and respond with a welcome message and a token', async () => {
+    await request(server).post('/api/auth/login').send({ username: 'test', password: 'test' })
+    const res = await request(server)
+      .post('/api/auth/login')
+      .send({ username: 'test', password: 'test' })
+    const token = res.body.token
+    const decoded = jwtDecode(token)
+    expect(res.body.message).toMatch(/welcome, test/i)
+    expect(decoded).toMatchObject({ username: 'test', iat: expect.any(Number) })
+  })
+
 })
