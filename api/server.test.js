@@ -3,7 +3,8 @@ const request = require('supertest')
 const server = require('./server')
 const db = require('../data/dbConfig')
 const bcrypt = require('bcryptjs')
-const jwtDecode = require('jwt-decode')
+const jwt = require('jsonwebtoken')
+const { JWT_SECRET } = require('./secret/index')
 
 beforeAll(async () => {
   await db.migrate.rollback()
@@ -52,22 +53,23 @@ describe('[POST] /api/auth/register', () => {
     expect(res.body.message).toMatch(/username and password required/i)
   })
   it('[4] responds with a message if the username is taken', async () => {
-    await request(server).post('/api/auth/register').send({ username: 'test', password: 'test' })
-    const res = await request(server).post('/api/auth/register').send({ username: 'test', password: 'test' })
+   const res = await request(server)
+      .post('/api/auth/register')
+      .send({ username: 'test', password: 'test' })
     expect(res.body.message).toMatch(/username taken/i)
   })
 })
 
 
 describe('[POST] /api/auth/login', () => {
-  it('[3] responds with a 200 status code if the user is logged in', async () => {
+  it('[5] responds with a 200 status code if the user is logged in', async () => {
     const res = await request(server)
       .post('/api/auth/login')
       .send({ username: 'test', password: 'test' })
     expect(res.status).toBe(200)
   }
   )
-  it('[4] responds with a 400 status code if username or password is missing', async () => {
+  it('[6] responds with a 400 status code if username or password is missing', async () => {
     const res = await request(server)
       .post('/api/auth/login')
       .send({ username: 'test' })
@@ -75,13 +77,13 @@ describe('[POST] /api/auth/login', () => {
   }
   )
 
-  it('[5] log in the user and respond with a welcome message and a token', async () => {
+  it('[7] log in the user and respond with a welcome message and a token', async () => {
     await request(server).post('/api/auth/login').send({ username: 'test', password: 'test' })
     const res = await request(server)
       .post('/api/auth/login')
       .send({ username: 'test', password: 'test' })
     const token = res.body.token
-    const decoded = jwtDecode(token)
+    const decoded = jwt.verify(token, JWT_SECRET)
     expect(res.body.message).toMatch(/welcome, test/i)
     expect(decoded).toMatchObject({ username: 'test', iat: expect.any(Number) })
   })

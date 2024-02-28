@@ -40,7 +40,7 @@ const validateUserName = async (req, res, next) => {
   try {
     const [user] = await findBy({ username: req.body.username });
     if(user) {
-      next({ status: 422, message: 'username taken'})
+      res.status.json({ status: 422, message: 'username taken'})
     } else {
       next();
     }

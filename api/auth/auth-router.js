@@ -3,16 +3,18 @@ const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('../users/user-model');
-const { restricted, validateUserName } = require('../middleware/restricted');
+const { validateUserName } = require('../middleware/restricted');
 
 
 
 
-
-router.post('/register', validateUserName, (req, res, next) => {
-  const { username, password } = req. body;
-  
+router.post('/register', validateUserName,  (req, res, next) => {
+  const { username, password } = req.body;
   const hash = bcrypt.hashSync(password, 8);
+
+  if(!username || !password)(err => {
+    res.status(400).json({ message: err.message })
+  })
 
     Users.add({ username, password: hash })
   .then(newUser => {
@@ -21,13 +23,10 @@ router.post('/register', validateUserName, (req, res, next) => {
       username: newUser.username,
       password: newUser.password
     })
-      console.log(res.body.message)
-    if(!username || !password) {
-      res.status(400).json({ message: 'username and password required' })
-    } else if (username === newUser.username) {
-      res.status(400).json({ status: 400, message: 'username taken' })
-    }
-  }) .catch(next)
+    
+  }) .catch(err => {
+    res.status(400).json({ message: err.message })  
+  })
 });
 
 
@@ -59,7 +58,7 @@ router.post('/register', validateUserName, (req, res, next) => {
   */
     
 
-router.post('/login', restricted, (req, res) => {
+router.post('/login', (req, res) => {
   const { username, password } = req.body;
   const userExists = true;
   const passwordCorrect = true;
@@ -68,7 +67,7 @@ router.post('/login', restricted, (req, res) => {
   if (!username || !password) {
     return res.status(400).json("username and password required");
   } else if (!userExists) {
-    return res.status(200).json("invalid credentials");
+    return res.status(400).json("invalid credentials");
   } else if (!passwordCorrect) {
     return res.status(400).json("invalid credentials");
   } else {
