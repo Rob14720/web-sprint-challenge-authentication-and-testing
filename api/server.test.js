@@ -40,6 +40,7 @@ describe('[POST] /api/auth/register', () => {
     .send({ username: 'meow', password: '1234' })
     expect(bcrypt.compareSync('1234', res.body.password)).toBeTruthy();
     expect(res.body).toMatchObject({
+      password: expect.any(String),
       username: 'meow',
       id: expect.any(Number),
     })
