@@ -3,30 +3,55 @@ const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('../users/user-model');
+const userExists  = require('../middleware/unique-name.js');
+const validateCredentials = require('../middleware/invCredentials.js');
+
+const generateToken = user => {
+  const payload = {
+    subject: user.id,
+    username: user.username,
+  };
+  const options = {
+    expiresIn: '1d',
+  };
+  return jwt.sign(payload, JWT_SECRET, options);
+};
 
 
-router.post('/register', (req, res) => {
-  const { username, password } = req.body;
-  const hash = bcrypt.hashSync(password, 8);
+router.post('/register', userExists, validateCredentials, async (req, res) => {
+  /*try {
 
-  if(!username || !password){
-    res.status(400).json({ message: 'username and password required'})
-  }
+    if(!username || !password){
+      res.status(400).json({ message: 'username and password required'})
+    }
+  
+    const { username, password } = req.body;
+    const hash = bcrypt.hashSync(password, 8);
+  
+  
+      Users.add({ username, password: hash })
+    .then(newUser => {
+      res.status(201).json({
+        id: newUser.id,
+        username: newUser.username,
+        password: newUser.password
+      })
 
-    Users.add({ username, password: hash })
-  .then(newUser => {
-    res.status(201).json({
-      id: newUser.id,
-      username: newUser.username,
-      password: newUser.password
-    })
-    
-  }) .catch(res =>{
-    res.status(400).json({ message: 'username taken'})
   })
+} catch(res =>{
+    res.status(400).json({ message: 'username taken'})
+  }) */
+  try {
+    const { username, password } = req.body;
+    const newUser = await Users.add({
+      username,
+      password: bcrypt.hashSync(password, 8),
+    })
+    res.status(201).json(newUser);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
-
-
 
 
 
