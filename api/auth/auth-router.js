@@ -3,7 +3,7 @@ const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../users/user-model');
-const userExists = require('../middleware/unique-name.js');
+
 
 
 const generateToken = user => {
@@ -18,7 +18,7 @@ const generateToken = user => {
 };
 
 
-router.post('/register', userExists, async (req, res, next) => {
+router.post('/register', async (req, res, next) => {
 
   try {
     const { username, password } = req.body;

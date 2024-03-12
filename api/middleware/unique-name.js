@@ -3,7 +3,7 @@ const Users = require('../users/user-model');
 const uniqueUser = async function (req, res, next) {
     try {
       const { username } = req.body;
-    const user = await Users.findBy(username);
+    const user = await Users.findBy({ username });
   
     if (user) {
       res.status(400).json({ message: 'username taken' });
