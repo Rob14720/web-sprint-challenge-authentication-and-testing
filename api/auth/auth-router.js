@@ -79,23 +79,16 @@ router.post('/register', userExists, async (req, res, next) => {
 */
 
 
-router.post('/login', (req, res) => {
+router.post('/login', (req, res, next) => {
   const { username, password } = req.body;
-  const userExists = true;
-  const passwordCorrect = true;
-  const token = jwt.sign({ username }, JWT_SECRET);
-  // Check if username and password are provided
-  if (!username || !password) {
-    return res.status(400).json("username and password required");
-  } else if (!userExists) {
-    return res.status(400).json("invalid credentials");
-  } else if (!passwordCorrect) {
-    return res.status(400).json("invalid credentials");
+  if (bcrypt.compareSync(req.body.password, req.user.password)) {
+    const token = generateToken(req.user);
+    res.json({
+      message: `${username} is back!`,
+      token,
+    })
   } else {
-    res.status(200).json({
-      message: `welcome, ${username}`,
-      token
-    });
+    next({ status: 401, message: 'Invalid credentials' });
   }
 
   // Check if the password is correct
