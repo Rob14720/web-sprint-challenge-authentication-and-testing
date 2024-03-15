@@ -5,9 +5,9 @@ function find() {
 }
 
 function findBy(filter) {
-    return db('users as u')
-        .select('u.id', 'u.username', 'u.password')
-        .where(filter)
+    const query = db('users').where(filter).first()
+    console.log(query.toString());
+    return query
 }
 
 async function add({username, password}) {
