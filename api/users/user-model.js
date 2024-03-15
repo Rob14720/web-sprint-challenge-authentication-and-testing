@@ -5,13 +5,11 @@ function find() {
 }
 
 function findBy(filter) {
-    const query = db('users').where(filter).first()
-    console.log(query.toString());
-    return query
+     return db('users').where(filter).first()
 }
 
 async function add({username, password}) {
-    const [id] = await db('users').insert({username, password})
+    const id = await db('users').insert({username, password})
     return findById(id)
 }
 

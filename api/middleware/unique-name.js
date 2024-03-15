@@ -5,7 +5,7 @@ const uniqueUser = async function (req, res, next) {
       const { username } = req.body;
     const user = await Users.findBy({ username: username });
   
-    if (!user) {
+    if (user) {
       res.status(400).json({ message: 'username taken' });
     } else {
       req.user = user;

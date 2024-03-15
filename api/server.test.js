@@ -35,11 +35,11 @@ describe('[POST] /api/auth/register', () => {
 
 
   it('[2] adds a new user with a bcrypted password to the users table on success', async () => {
-    const res = await request(server)
+    const req = await request(server)
     .post('/api/auth/register')
     .send({ username: 'meow', password: '1234' })
-    expect(bcrypt.compareSync('1234', res.body.password)).toBeTruthy();
-    expect(res.body).toMatchObject({
+    expect(bcrypt.compareSync('1234', req.body.password)).toBeTruthy();
+    expect(req.body).toMatchObject({
       password: expect.any(String),
       username: 'meow',
       id: expect.any(Number),
