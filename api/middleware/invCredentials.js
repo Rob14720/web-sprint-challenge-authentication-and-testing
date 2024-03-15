@@ -4,10 +4,10 @@ const invCredentials = async function (req, res, next) {
   const { username } = req.body;
   const user = await Users.findBy(username);
 
-  if (!user) {
+  if (user.username.length === 0 && user.password.length === 0) {
     res.status(400).json({ message: 'username and password required' });
   } else {
-    req.user = user;
+    // req.user = user;
     next();
   }
 }
