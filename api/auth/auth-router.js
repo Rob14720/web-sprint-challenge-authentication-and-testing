@@ -28,19 +28,22 @@ router.post('/register', required, uniqueUser, async (req, res, next) => {
   //   res.status(201).json(newUser);
   // });
   try {
+    
     const { username, password } = req.body;
-    const { hash } = bcrypt.hashSync(password, 8);
-     User.add({ username, password: hash })
-      .then(newUser => {
-        res.status(201).json({
-          id: newUser.id,
-          username: newUser.username,
-          password: newUser.password,
-        });
-      })
+    const hash = bcrypt.hashSync(password, 8);
+    const newUser = await User.add({
+      username,
+      password: hash
+    })
+    res.status(201).json({
+      id: newUser.id,
+      username: newUser.username,
+      password: newUser.password
+    
+    });
   } catch (err) {
     next(err);
-}
+  }
 });
 
 
@@ -75,10 +78,11 @@ router.post('/register', required, uniqueUser, async (req, res, next) => {
 
 
 router.post('/login', checkUsernameExists, (req, res, next) => {
-  if (bcrypt.compareSync(req.body.password, req.user.password)) {
+  const { username, password } = req.body;
+  if (bcrypt.compareSync(username, password)) {
     const token = generateToken(req.user);
     res.json({
-      message: `${req.user.username} is back!`,
+      message: `${username} is back!`,
       token,
     })
   } else {
