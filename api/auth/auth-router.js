@@ -3,6 +3,9 @@ const { JWT_SECRET } = require('../secret')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../users/user-model');
+const uniqueUser = require('../middleware/unique-name');
+const checkUsernameExists = require('../middleware/logMeIn');
+const required = require('../middleware/required');
 
 
 
@@ -18,23 +21,17 @@ const generateToken = user => {
 };
 
 
-router.post('/register', async (req, res, next) => {
-
-  try {
+router.post('/register', uniqueUser, required, async (req, res, next) => {
     const { username, password } = req.body;
     const hash = bcrypt.hashSync(password, 8);
-    User.add({ username, password: hash })
-      .then(newUser => {
-        res.status(201).json({
-          id: newUser.id,
-          username: newUser.username,
-          password: newUser.password
-        });
-      })
-  } catch (err) {
-    next(err);
-  }
-});
+    const newUser = { username, password: hash };
+    try {
+      const user = await User.add(newUser);
+      res.status(201).json(user);
+    } catch (err) {
+      next(err);
+    }
+  });
 //   try {
 //     const { username, password } = req.body;
 //     const newUser = await User.add({
@@ -79,7 +76,7 @@ router.post('/register', async (req, res, next) => {
 */
 
 
-router.post('/login', (req, res, next) => {
+router.post('/login', checkUsernameExists, (req, res, next) => {
   const { username, password } = req.body;
   if (bcrypt.compareSync(username, password)) {
     const token = generateToken(req.user);
