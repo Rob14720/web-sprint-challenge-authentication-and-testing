@@ -7,7 +7,6 @@ const required = async function (req, res, next) {
     if ( trimmedUsername.length === 0 || trimmedPassword.length === 0) {
       res.status(400).json({ message: 'username and password required' });
     } else {
-      req.user = { username, password };
       next();
     }
   } catch (err) {

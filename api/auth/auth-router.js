@@ -27,19 +27,11 @@ router.post('/register', required, uniqueUser, async (req, res, next) => {
   //   const newUser = await User.add({ username, password: hash });
   //   res.status(201).json(newUser);
   // });
+  const { username, password } = req.body;
+  const hash = bcrypt.hashSync(password, 8);
   try {
-    const { username, password } = req.body;
-    const hash = bcrypt.hashSync(password, 8);
-    const newUser = await User.add({
-      username,
-      password: hash
-    })
-    res.status(201).json({
-      id: newUser.id,
-      username: newUser.username,
-      password: newUser.password
-    
-    });
+    const newUser = await User.add({ username, password: hash });
+    res.status(201).json(newUser);
   } catch (err) {
     next(err);
   }
