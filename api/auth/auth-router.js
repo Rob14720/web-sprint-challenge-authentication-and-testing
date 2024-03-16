@@ -69,11 +69,10 @@ router.post('/register', required, uniqueUser, async (req, res, next) => {
 
 
 router.post('/login', checkUsernameExists, (req, res, next) => {
-  const { username, password } = req.body;
-  if (bcrypt.compareSync(username, password)) {
+  if (bcrypt.compareSync(req.body.password, req.user.password)) {
     const token = generateToken(req.user);
     res.json({
-      message: `${username} is back!`,
+      message: `${req.user.username} is back!`,
       token,
     })
   } else {
