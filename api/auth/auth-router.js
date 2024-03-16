@@ -22,28 +22,21 @@ const generateToken = user => {
 
 
 router.post('/register', uniqueUser, required, async (req, res, next) => {
+  //   const { username, password } = req.body;
+  //   const hash = bcrypt.hashSync(password, 8);
+  //   const newUser = await User.add({ username, password: hash });
+  //   res.status(201).json(newUser);
+  // });
   try {
     const { username, password } = req.body;
-    const hash = bcrypt.hashSync(password, 8);
-    const newUser = await User.add({ username,})
-    res.status(201).json({
-      id: newUser.id,
-      username: newUser.username,
-      password: hash,
-    });
+    const newUser = await User.add({
+      username,
+      password: bcrypt.hashSync(password, 8),
+    })
+    res.status(201).json(newUser);
   } catch (err) {
     next(err);
   }
-  // try {
-  //   const { username, password } = req.body;
-  //   const newUser = await User.add({
-  //     username,
-  //     password: bcrypt.hashSync(password, 8),
-  //   })
-  //   res.status(201).json(newUser);
-  // } catch (err) {
-  //   next(err);
-  // }
 });
 
 

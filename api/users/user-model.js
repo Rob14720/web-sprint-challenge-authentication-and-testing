@@ -8,14 +8,14 @@ function findBy(filter) {
      return db('users').where(filter).first()
 }
 
-async function add({ username, password }) {
-    const [id] = await db('users').insert({ username, password });
-    return findById(id);
+async function add({username, password}) {
+    const [id] = await db('users').insert({username, password})
+    return findById(id)
 }
 
 async function findById(id) {
     return db('users as u')
-        .select('u.id', 'u.username', 'u.password')
+        .select('u.id', 'u.username')
         .where({ id }).first()
 }
 
