@@ -77,17 +77,23 @@ router.post('/register', required, uniqueUser, async (req, res, next) => {
 */
 
 
-router.post('/login', checkUsernameExists, (req, res, next) => {
-  const { username, password } = req.body;
-  if (bcrypt.compareSync(username, password)) {
-    const token = generateToken(req.user);
-    res.json({
-      message: `${username} is back!`,
-      token,
-    })
-  } else {
-    next({ status: 401, message: 'Invalid credentials' });
+router.post('/login', required, checkUsernameExists, async (req, res, next) => {
+  const { username } = req.body;
+  const user = req.user;
+
+  try {
+    const passwordValid = await bcrypt.compare(req.body.password, user.password);
+
+    if (!passwordValid) {
+      return res.status(401).json({ message: 'invalid credentials' });
+    }
+
+    const token = generateToken(user);
+    res.status(200).json({ message: `welcome, ${username}!`, token });
+  } catch (err) {
+    next(err);
   }
+});
 
   // Check if the password is correct
   // Replace the following code with your logic to check if the password is correct
@@ -97,8 +103,6 @@ router.post('/login', checkUsernameExists, (req, res, next) => {
 
 
   // Return the response with the new user's information and token
-});
-
 
 
 /*
