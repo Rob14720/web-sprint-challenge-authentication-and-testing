@@ -34,11 +34,12 @@ router.post('/register', required, uniqueUser, async (req, res, next) => {
     const newUser = await User.add({
       username,
       password: hash
-    })
+    });
+    
     res.status(201).json({
       id: newUser.id,
       username: newUser.username,
-      password: newUser.password
+      password: hash
     
     });
   } catch (err) {
